@@ -1,4 +1,6 @@
-import axios from "axios";
+// const { Notify } = require("notiflix");
+
+// import axios from "axios";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import SimpleLightbox from "simplelightbox";
@@ -8,48 +10,65 @@ const API_KEY = '32152184-2ad461e647b19751df8bc3af5';
 
 let currentPage = 1;
 let totalPages = undefined;
-const PageSize = 40;
+const perPage = 40;
 
-const searchBtn = document.getElementById('searchBtn');
-const searchField = document.getElementById('search-images'); 
+const searchField = document.getElementById('search-form'); 
 const baseURL = 'https://pixabay.com/api/?key=';
 const searchParameters='image_type=photo&orientation=horizontal&safesearch=true'
 
-const articlesContainer = document.getElementById('articles'); // контейнер для статей
-const paginationContainer = document.getElementById('pagination'); // контейнер для пагінації
-const loadMoreBtnRef = document.getElementById('loadMore'); // кнопка підгрузки іще
+// const articlesContainer = document.getElementById('articles'); // контейнер для статей
+// const paginationContainer = document.getElementById('pagination'); // контейнер для пагінації
+// const loadMoreBtnRef = document.getElementById('loadMore'); // кнопка підгрузки іще
+let keyWord = '';
 
 const imagesContainer = document.querySelector('.gallery');
 
-searchBtn.addEventListener("click", e => {
+searchField.addEventListener("submit", e => {
   e.preventDefault();
-  console.log(searchField.value);
-  getImages({ query: searchField.value })
-});
+   keyWord = e.currentTarget.searchQuery.value;
+  console.log(keyWord);
+  if (keyWord === '') {
+    Notify.warning("Enter the keyword");
+    return;
+  }
+  getImages({keyWord})
+    // .then((hits) => render(hits))
+    // .catch((error) => console.log(error));
+  })
 
 
-function getImages() {
-  fetch(`${baseURL}${API_KEY}&q=${searchField.value}${searchParameters}`)
+function getImages({keyWord}) {
+  fetch(`${baseURL}${API_KEY}&q=${keyWord}&${searchParameters}&per_page=${perPage}&page=${currentPage}`)
     .then(res => {
-    // if (res !== "ok"){
-    //   throw new Error(res.status)
-    // }
+    if (res.status !== 200){
+    throw new Error(res.message)
+    }
     return res.json(); 
     })   
-    .then(({ hits }) => {
+    .then( ({hits, totalHits})  => {
       console.log(hits);
-    render(hits)
-  })
-    
+      console.log(totalHits);
+      render(hits);
+      calculatePagination(totalHits)
+    })
+        
 }
 
+function calculatePagination(totalHits) { 
+  totalPages = Math.ceil(totalHits / perPage);
+  console.log(totalPages);
+  if (totalPages <= perPage) {
+    loadMoreBtn.classList.add('is-hidden');
+  }
+  
+}
 
 function render(hits) {
   imagesContainer.innerHTML = '';
   hits.forEach(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
     const imagesEl = `<div class="photo-card">
   <a class="gallery__link" href="${largeImageURL}"><img src="${webformatURL}" alt="${tags}" loading="lazy" />
-  </a > <div class="info">
+  </a> <div class="info">
     <p class="info-item">
       <b>${likes}</b>
     </p>
@@ -63,12 +82,12 @@ function render(hits) {
       <b>${downloads}</b>
     </p>
   </div>
-</div>
-`).join('');
-   imagesContainer.insertAdjacentHTML('beforeend',imagesEl) 
-  }
-//   )
-// }
+</div>`;
+    imagesContainer.insertAdjacentHTML('beforeend', imagesEl)
+  });
+}
+  
+
 
 // const galleryContainer = document.querySelector('.gallery');
 
@@ -85,11 +104,11 @@ function render(hits) {
 // console.log (markup);
 // galleryContainer.insertAdjacentHTML("beforeend", markup);
 
+let gallery = new SimpleLightbox('.gallery a');
+gallery.on('show.simplelightbox', function (e) {
+console.log(e);  });
 
+gallery.on('error.simplelightbox', function (e) {
+  console.log(e);
+});
 
-// let gallery = new SimpleLightbox('.gallery a');
-// gallery.on('show.simplelightbox', function (e) {
-// console.log(e);  });
-
-// gallery.on('error.simplelightbox', function (e) {
-// console.log(e);  });
