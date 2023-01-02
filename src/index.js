@@ -44,7 +44,8 @@ async function getImages() {
      console.log(response.data.hits);
     console.log(response.data.totalHits);
         console.log(response.data.hits.length);
-          if (response.data.totalHits === 0) {
+    if (response.data.totalHits === 0) {
+        loadMoreBtn.classList.add('is-hidden');
         Notify.warning("Sorry, there are no images matching your search query. Please try again.");
     }
     render(response.data.hits);
