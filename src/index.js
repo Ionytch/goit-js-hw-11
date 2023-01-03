@@ -23,6 +23,7 @@ const imagesContainer = document.querySelector('.gallery');
 
 searchField.addEventListener("submit", e => {
   e.preventDefault();
+  imagesContainer.innerHTML = '';
   currentPage = 1;
    keyWord = e.currentTarget.searchQuery.value;
   console.log(keyWord);
@@ -78,8 +79,7 @@ loadMoreBtn.addEventListener("click", e => {
 })
 
 function render(hits) {
-  imagesContainer.innerHTML = '';
-  hits.forEach(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
+    hits.forEach(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
     const imagesEl = `<div class="photo-card"><a class="gallery__link" href="${largeImageURL}">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   </a>
